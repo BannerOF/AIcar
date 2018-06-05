@@ -16,7 +16,7 @@ else:
     print("(+) Pygame initialised successfully ")
 
 # Play Surface
-size = width, height = 640, 640 
+size = width, height = 1000, 1000 
 playSurface = pygame.display.set_mode(size)
 pygame.display.set_caption("AIcar")
 
@@ -32,10 +32,12 @@ fpsController = pygame.time.Clock()
 # Game settings
 carPos = [200, 200]
 carDir = 0
-V = 5 
+V = 0 
+VMAX = 5
+Vdown = 0
+Vup = 0
 circleR = 90
 carTurn = 'FORWARD'
-carRun = 'STOP'
 
 while True:
 	for event in pygame.event.get():
@@ -49,7 +51,9 @@ while True:
 			if event.key == pygame.K_RIGHT:
 				carTurn = 'RIGHT'
 			if event.key == pygame.K_UP:
-				carRun = 'RUN'
+				Vup = 0.05
+			if event.key == pygame.K_DOWN:
+				Vdown = 0.05
 			if event.key == pygame.K_ESCAPE:
 				pygame.event.post(pygame.event.Event(pygame.QUIT))
 
@@ -57,14 +61,22 @@ while True:
 			if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
 				carTurn = 'FORWARD'
 			if event.key == pygame.K_UP:
-				carRun = 'STOP'
+				Vup = 0
+			if event.key == pygame.K_DOWN:
+				Vdown = 0
 
 	
 	#pdb.set_trace()
-	if carRun == 'STOP':
+	V += Vup - Vdown - 0.01
+
+	if V < 0:
 		V = 0
-	else:
-		V = 5
+	elif V > VMAX:
+		V = VMAX
+	
+	circleR = 5 + V * 100
+
+	if V > 0:
 		Yspeed = V*math.sin(carDir)
 		Xspeed = V*math.cos(carDir)
 		if carTurn == 'FORWARD':
@@ -74,7 +86,6 @@ while True:
 			therta = V/float(circleR)
 			Xcar = circleR-circleR*math.cos(therta)
 			Ycar = circleR*math.sin(therta)
-
 
 			cosT = Yspeed/float(V) 
 			sinT = Xspeed/float(V)
@@ -89,7 +100,7 @@ while True:
 
 	playSurface.fill(white)
 	pygame.draw.line(playSurface, black, carPos, [carPos[0]+int(V*math.cos(carDir)*5), carPos[1]+int(V*math.sin(carDir)*5)], 1)
-	pygame.draw.circle(playSurface, black, [int(round(carPos[0])), int(round(carPos[1]))], 10, 1)
+	pygame.draw.circle(playSurface, black, [int(round(carPos[0])), int(round(carPos[1]))], 10, 2)
 	pygame.display.flip()
 
-	fpsController.tick(20)
+	fpsController.tick(60)
