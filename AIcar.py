@@ -29,7 +29,7 @@ brown = pygame.Color(165, 42, 42)
 # FPS controller
 fpsController = pygame.time.Clock()
 
-# Game settings
+# Game data
 carPos = [200, 200]
 carDir = 0
 V = 0 
@@ -38,6 +38,25 @@ Vdown = 0
 Vup = 0
 circleR = 90
 carTurn = 'FORWARD'
+
+walls = [([30, 70],[300, 200]), ([560, 700],[890, 800])]
+
+def distancePtSeg(pt, p, q):
+	pqx = q[0] - p[0]
+	pqy = q[1] - p[1]
+	dx = pt[0] - p[0]
+	dy = pt[1] - p[1]
+	d = pqx*pqx + pqy*pqy
+	t = pqx*dx + pqy*dy
+	if(d > 0):
+		t /= d
+	if(t < 0):
+		t = 0
+	elif(t > 1):
+		t = 1	
+	dx = p[0] + t*pqx - pt[0]
+	dy = p[1] + t*pqy - pt[1]
+	return math.sqrt(dx*dx+dy*dy)
 
 while True:
 	for event in pygame.event.get():
@@ -74,7 +93,7 @@ while True:
 	elif V > VMAX:
 		V = VMAX
 	
-	circleR = 5 + V * 100
+	circleR = 2 + V * 60
 
 	if V > 0:
 		Yspeed = V*math.sin(carDir)
@@ -98,9 +117,17 @@ while True:
 			elif carTurn == 'LEFT':
 				carDir -= therta
 
+	for sp, ep in walls:
+		if distancePtSeg(carPos, sp, ep) < 10:
+			pygame.quit()	
+			sys.exit()
+
+
 	playSurface.fill(white)
 	pygame.draw.line(playSurface, black, carPos, [carPos[0]+int(V*math.cos(carDir)*5), carPos[1]+int(V*math.sin(carDir)*5)], 1)
 	pygame.draw.circle(playSurface, black, [int(round(carPos[0])), int(round(carPos[1]))], 10, 2)
+	for sp, ep in walls:
+		pygame.draw.line(playSurface, black, sp, ep, 1)
 	pygame.display.flip()
 
 	fpsController.tick(60)
