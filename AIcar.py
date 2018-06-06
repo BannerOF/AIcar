@@ -1,4 +1,5 @@
 import pygame
+import json
 import math
 import sys
 import time
@@ -12,8 +13,6 @@ init_status = pygame.init()
 if init_status[1] > 0:
     print("(!) Had {0} initialising errors, exiting... ".format(init_status[1]))
     sys.exit()
-else:
-    print("(+) Pygame initialised successfully ")
 
 # Play Surface
 size = width, height = 1000, 1000 
@@ -39,7 +38,10 @@ Vup = 0
 circleR = 90
 carTurn = 'FORWARD'
 
-walls = [([30, 70],[300, 200]), ([560, 700],[890, 800])]
+f = open("Map.json", "r")
+Mapread = f.readline()
+walls = json.loads(Mapread)
+f.close()
 
 def distancePtSeg(pt, p, q):
 	pqx = q[0] - p[0]
@@ -93,7 +95,7 @@ while True:
 	elif V > VMAX:
 		V = VMAX
 	
-	circleR = 2 + V * 60
+	circleR = 2 + V * 50
 
 	if V > 0:
 		Yspeed = V*math.sin(carDir)
