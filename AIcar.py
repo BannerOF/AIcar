@@ -60,6 +60,34 @@ def distancePtSeg(pt, p, q):
 	dy = p[1] + t*pqy - pt[1]
 	return math.sqrt(dx*dx+dy*dy)
 
+def IsRectCross(p1, p2, q1, q2):
+	return min(p1[0], p2[0]) <= max(q1[0], q2[0]) and \
+		min(q1[0], q2[0]) <= max(p1[0], p2[0]) and \
+		min(p1[1], p2[1]) <= max(q1[1], q2[1]) and \
+		min(q1[1], q2[1]) <= max(p1[1], p2[1])
+
+def IsLineSegmentCross(p1, p2, q1, q2):
+	return (((q1[0]-p1[0])*(q1[1]-q2[1])-(q1[1]-p1[1])*(q1[0]-q2[0]))*((q1[0]-p2[0])*(q1[1]-q2[1])-(q1[1]-p2[1])*(q1[0]-q2[0]))<0 and \
+		((p1[0]-q1[0])*(p1[1]-p2[1])-(p1[1]-q1[1])*(p1[0]-p2[0]))*((p1[0]-q2[0])*(p1[1]-p2[1])-(p1[1]-q2[1])*(p1[0]-p2[0]))<0)
+
+def GetCrossPoint(p1, p2, q1, q2):
+	ret = [1, 0, 0]
+	if IsRectCross(p1, p2, q1, q2):
+		if IsLineSegmentCross(p1, p2, q1, q2):
+			tmpLeft = (q2[0]-q1[0]) * (p1[1]-p2[1]) - (p2[0]-p1[0]) * (q1[1]-q2[1])
+			tmpRight = (p1[1]-q1[1]) * (p2[0]-p1[0]) * (q2[0]-q1[0]) + q1[0] * (q2[1]-q1[1]) *(p2[0]-p1[0]) - p1[0] * (p2[1]-p1[1]) * (q2[0]-q1[0])
+			ret[1] = int(float(tmpRight)/float(tmpLeft))
+
+			tmpLeft = (p1[0]-p2[0]) * (q2[1]-q1[1]) - (p2[1]-p1[1]) * (q1[0]-q2[0])
+			tmpRight = p2[1] * (p1[0]-p2[0]) * (q2[1]-q1[1]) + (q2[0]-p2[0]) * (q2[1]-q1[1]) * (p1[1]-p2[1]) - q2[1] * (q1[0]-q2[0]) * (p2[1]-p1[1])
+			ret[2] = int(float(tmpRight)/float(tmpLeft))
+
+			ret[0] = 1
+			return ret
+	ret[0] = 0
+	return ret
+	
+
 while True:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
@@ -118,16 +146,27 @@ while True:
 				carDir += therta	
 			elif carTurn == 'LEFT':
 				carDir -= therta
-
+	
+	P1 = [int(round(carPos[0])), int(round(carPos[1]))]
+	P2 = [P1[0]+int(400*math.cos(carDir)), P1[1]+int(400*math.sin(carDir))]
+	P3 = P2
+	Minlength = 400
 	for sp, ep in walls:
 		if distancePtSeg(carPos, sp, ep) < 10:
 			pygame.quit()	
 			sys.exit()
+		Ret = GetCrossPoint(P1, P2, sp, ep)
+		if Ret[0] == 1:
+			tempres = math.sqrt(pow(P1[0]-Ret[1],2)+pow(P1[1]-Ret[2],2))		
+			if tempres < Minlength:
+				Minlength = tempres
+				P3[0] = Ret[1]
+				P3[1] = Ret[2]
 
 
 	playSurface.fill(white)
-	pygame.draw.line(playSurface, black, carPos, [carPos[0]+int(V*math.cos(carDir)*5), carPos[1]+int(V*math.sin(carDir)*5)], 1)
-	pygame.draw.circle(playSurface, black, [int(round(carPos[0])), int(round(carPos[1]))], 10, 2)
+	pygame.draw.line(playSurface, black, carPos, P3, 1)
+	pygame.draw.circle(playSurface, black, P1, 10, 2)
 	for sp, ep in walls:
 		pygame.draw.line(playSurface, black, sp, ep, 1)
 	pygame.display.flip()
