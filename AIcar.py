@@ -148,24 +148,44 @@ while True:
 				carDir -= therta
 	
 	P1 = [int(round(carPos[0])), int(round(carPos[1]))]
-	P2 = [P1[0]+int(400*math.cos(carDir)), P1[1]+int(400*math.sin(carDir))]
-	P3 = P2
-	Minlength = 400
+	PF = [P1[0]+int(400*math.cos(carDir)), P1[1]+int(400*math.sin(carDir))]
+	PFR = [P1[0]+int(400*math.cos(carDir+math.pi/4)), P1[1]+int(400*math.sin(carDir+math.pi/4))]
+	PR = [P1[0]+int(400*math.cos(carDir+math.pi/2)), P1[1]+int(400*math.sin(carDir+math.pi/2))]
+	PFL = [P1[0]+int(400*math.cos(carDir-math.pi/4)), P1[1]+int(400*math.sin(carDir-math.pi/4))]
+	PL = [P1[0]+int(400*math.cos(carDir-math.pi/2)), P1[1]+int(400*math.sin(carDir-math.pi/2))]
 	for sp, ep in walls:
 		if distancePtSeg(carPos, sp, ep) < 10:
 			pygame.quit()	
 			sys.exit()
-		Ret = GetCrossPoint(P1, P2, sp, ep)
+		Ret = GetCrossPoint(P1, PF, sp, ep)
 		if Ret[0] == 1:
-			tempres = math.sqrt(pow(P1[0]-Ret[1],2)+pow(P1[1]-Ret[2],2))		
-			if tempres < Minlength:
-				Minlength = tempres
-				P3[0] = Ret[1]
-				P3[1] = Ret[2]
+			PF[0] = Ret[1]
+			PF[1] = Ret[2]
+		Ret = GetCrossPoint(P1, PFR, sp, ep)
+		if Ret[0] == 1:
+			PFR[0] = Ret[1]
+			PFR[1] = Ret[2]
+		Ret = GetCrossPoint(P1, PR, sp, ep)
+		if Ret[0] == 1:
+			PR[0] = Ret[1]
+			PR[1] = Ret[2]
+		Ret = GetCrossPoint(P1, PFL, sp, ep)
+		if Ret[0] == 1:
+			PFL[0] = Ret[1]
+			PFL[1] = Ret[2]
+		Ret = GetCrossPoint(P1, PL, sp, ep)
+		if Ret[0] == 1:
+			PL[0] = Ret[1]
+			PL[1] = Ret[2]
 
 
 	playSurface.fill(white)
-	pygame.draw.line(playSurface, black, carPos, P3, 1)
+	pygame.draw.line(playSurface, red, carPos, PF, 1)
+	pygame.draw.circle(playSurface, red, PF, 3, 3)
+	pygame.draw.circle(playSurface, red, PFR, 3, 3)
+	pygame.draw.circle(playSurface, red, PR, 3, 3)
+	pygame.draw.circle(playSurface, red, PFL, 3, 3)
+	pygame.draw.circle(playSurface, red, PL, 3, 3)
 	pygame.draw.circle(playSurface, black, P1, 10, 2)
 	for sp, ep in walls:
 		pygame.draw.line(playSurface, black, sp, ep, 1)
